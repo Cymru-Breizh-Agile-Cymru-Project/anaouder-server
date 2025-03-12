@@ -3,6 +3,7 @@ import subprocess
 from pathlib import Path
 from xml.dom import minidom
 
+from anaouder.asr.models import get_latest_model
 from audio_utils import prepare_audio
 from celery import Celery
 from speech_to_text_tasks import SpeechToTextTask
@@ -42,6 +43,7 @@ def speech_to_text(self, audio_file_path: str):
     process = subprocess.Popen(
         [
             "adskrivan",
+            *("-m", str(Path("/models") / get_latest_model())),
             *("-t", "eaf"),
             *("-o", str(eaf_file_path)),
             "--autosplit",
