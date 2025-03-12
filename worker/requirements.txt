@@ -1,0 +1,11 @@
+celery
+redis
+fleep
+srt
+pympi-ling
+yt-dlp
+pydub
+ffmpeg-normalize
+SciPy
+webvtt-py
+anaouder

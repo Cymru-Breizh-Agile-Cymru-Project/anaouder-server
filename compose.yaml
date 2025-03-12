@@ -1,0 +1,49 @@
+services:
+
+  application:
+     image: techiaith/kaldi-api
+     container_name: kaldi-api
+     restart: always
+     environment:
+       - REDIS_HOST=kaldi_redis
+       - REDIS_PORT=6379
+     build:
+       context: ${PWD}/api
+       dockerfile: Dockerfile
+     ports:
+       - "5511:8000"
+     volumes: 
+       - ${PWD}/recordings:/recordings
+       - ${PWD}/logs:/var/log/api
+     depends_on:
+       - redis
+
+
+  worker:
+    image: techiaith/kaldi-worker
+    container_name: kaldi-worker
+    restart: always
+    environment:
+      - REDIS_HOST=kaldi_redis
+      - REDIS_PORT=6379
+    build:
+      context: ${PWD}/worker
+      dockerfile: Dockerfile
+    volumes: 
+       - ${PWD}/recordings:/recordings
+       - ${PWD}/logs:/var/log/kaldi
+    depends_on:
+       - redis
+
+
+  redis:
+    image: redis:7.2.1
+    container_name: kaldi-server-backend-redis 
+    hostname: kaldi_redis
+    restart: always
+    volumes:
+       - redis_data:/data
+
+volumes:
+    redis_data: {}
+
