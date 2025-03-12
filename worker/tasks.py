@@ -59,14 +59,15 @@ def speech_to_text(self, audio_file_path: str):
         raise RuntimeError(
             f"sub-process call to adskrivan returned a non-zero return code ({process.returncode})"
         )
-    
 
-    
     print("Patching the ELAN file")
     doc = minidom.parseString(eaf_file_path.read_text())
-    media_descriptor = doc.getElementsByTagName('MEDIA_DESCRIPTOR')[0]
-    media_descriptor.setAttribute('MEDIA_URL', f"https://localhost:5511/get_wav/stt_id=?{wav_audio_file_path.stem}")
-    media_descriptor.removeAttribute('RELATIVE_MEDIA_URL')
+    media_descriptor = doc.getElementsByTagName("MEDIA_DESCRIPTOR")[0]
+    media_descriptor.setAttribute(
+        "MEDIA_URL",
+        f"https://localhost:5511/get_wav/stt_id=?{wav_audio_file_path.stem}",
+    )
+    media_descriptor.removeAttribute("RELATIVE_MEDIA_URL")
     eaf_file_path.write_bytes(doc.toxml(encoding="UTF-8"))
     print(f"Saved output to {eaf_file_path}")
 
