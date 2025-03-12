@@ -3,6 +3,7 @@ import subprocess
 from pathlib import Path
 from xml.dom import minidom
 
+from anaouder.asr.models import get_latest_model
 from audio_utils import prepare_audio
 from celery import Celery
 from speech_to_text_tasks import SpeechToTextTask
@@ -42,6 +43,7 @@ def speech_to_text(self, audio_file_path: str):
     process = subprocess.Popen(
         [
             "adskrivan",
+            *("-m", str(Path("/models") / get_latest_model())),
             *("-t", "eaf"),
             *("-o", str(eaf_file_path)),
             "--autosplit",
@@ -57,14 +59,15 @@ def speech_to_text(self, audio_file_path: str):
         raise RuntimeError(
             f"sub-process call to adskrivan returned a non-zero return code ({process.returncode})"
         )
-    
 
-    
     print("Patching the ELAN file")
     doc = minidom.parseString(eaf_file_path.read_text())
-    media_descriptor = doc.getElementsByTagName('MEDIA_DESCRIPTOR')[0]
-    media_descriptor.setAttribute('MEDIA_URL', f"https://localhost:5511/get_wav/stt_id=?{wav_audio_file_path.stem}")
-    media_descriptor.removeAttribute('RELATIVE_MEDIA_URL')
+    media_descriptor = doc.getElementsByTagName("MEDIA_DESCRIPTOR")[0]
+    media_descriptor.setAttribute(
+        "MEDIA_URL",
+        f"https://localhost:5511/get_wav/stt_id=?{wav_audio_file_path.stem}",
+    )
+    media_descriptor.removeAttribute("RELATIVE_MEDIA_URL")
     eaf_file_path.write_bytes(doc.toxml(encoding="UTF-8"))
     print(f"Saved output to {eaf_file_path}")
 

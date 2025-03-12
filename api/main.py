@@ -204,8 +204,8 @@ async def save_sound_file(stt_id, soundfile):
         data = await soundfile.read()
         async with aiofiles.open(audio_file_path, "wb") as f:
             await f.write(data)
-    except Exception as exc:
-        exc.print_exc()
+    except Exception as _:
+        traceback.print_exc()
     return audio_file_path, os.path.getsize(audio_file_path)
 
 

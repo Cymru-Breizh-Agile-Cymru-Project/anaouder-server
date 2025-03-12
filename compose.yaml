@@ -13,6 +13,7 @@ services:
      ports:
        - "5011:8000"
      volumes: 
+       - ${PWD}/models:/models
        - ${PWD}/recordings:/recordings
        - ${PWD}/logs:/var/log/api
      depends_on:
@@ -30,6 +31,7 @@ services:
       context: ${PWD}/worker
       dockerfile: Dockerfile
     volumes: 
+       - ${PWD}/models:/models
        - ${PWD}/recordings:/recordings
        - ${PWD}/logs:/var/log/kaldi
     depends_on:

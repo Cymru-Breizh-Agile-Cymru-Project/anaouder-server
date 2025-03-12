@@ -1,7 +1,8 @@
+from pathlib import Path
+
+from anaouder.asr.models import _download, get_latest_model
 from celery import Task
 
-
-from anaouder.asr.models import _download, _get_model_directory, get_latest_model
 
 class SpeechToTextTask(Task):
     """
@@ -12,7 +13,9 @@ class SpeechToTextTask(Task):
 
     def __init__(self):
         super().__init__()
-        _download(get_latest_model(), _get_model_directory())
+        model_path = Path("/models") / get_latest_model()
+        if not model_path.exists():
+            _download(get_latest_model(), "/models")
 
     def __call__(self, *args, **kwargs):
         """
