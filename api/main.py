@@ -230,8 +230,7 @@ async def get_json(stt_id):
 @app.get("/get_elan/", response_class=FileResponse)
 async def get_elan(stt_id):
     eaf_file_path = Path(os.path.join(UPLOAD_DIR, stt_id + ".eaf"))
-    print(eaf_file_path)
-    return eaf_file_path
+    return FileResponse(path=eaf_file_path, filename=Path(eaf_file_path).name)
 
 
 @app.get("/get_srt/", response_class=FileResponse)
