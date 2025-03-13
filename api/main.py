@@ -1,6 +1,7 @@
 import os
 import traceback
 import uuid
+from datetime import datetime, timezone
 from pathlib import Path
 
 import aiofiles
@@ -60,19 +61,25 @@ async def version():
 async def get_status(stt_id):
     # mae 'tasks' yn dict, yn y RAM, sydd yn cynnwys task_ids pob job sydd
     # wedi mynd i Celery/Redis.
-    task_status = "UNKNOWN"
     if stt_id in tasks:
         task_result = AsyncResult(tasks[stt_id])
-        task_status = task_result.status
-    # else
-    # galw ar y jobs API i wybod os yw'r stt_id dal yn aros am callback.
-    # Dyle hyn gweithio os yw'r gweinydd wedi ei ail-gychwyn.
+        return {
+            "version": 2,
+            "status": task_result.status,
+            "done": task_result.date_done 
+        }
+    
+    potential_path = Path(UPLOAD_DIR) / f"{stt_id}.eaf"
+    if potential_path.exists():
+        time = datetime.fromtimestamp(potential_path.stat().st_ctime, tz=timezone.utc)
+        return {
+            "version": 2,
+            "status": "Success",
+            "done": time.isoformat()
+        }
 
-    #
-    result = {"version": 2, "status": task_status}
+    return {"version": 2, "status": "UNKNOWN"}
 
-    #
-    return result
 
 
 @app.post("/keyboard/", response_class=FileResponse)
