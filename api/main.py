@@ -7,6 +7,7 @@ import aiofiles
 from celery import Celery
 from celery.result import AsyncResult
 from fastapi import FastAPI, File, Form, Request, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from files_store import (
     append_data_chunk,
@@ -29,6 +30,17 @@ BACKEND_CONN_URI = f"redis://{REDIS_HOST}:{REDIS_PORT}/0"
 BROKER_CONN_URI = BACKEND_CONN_URI
 
 app = FastAPI()
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 tasks = dict()
 celery = Celery("tasks", broker=BROKER_CONN_URI, backend=BACKEND_CONN_URI)
