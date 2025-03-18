@@ -65,12 +65,11 @@ def speech_to_text(self, audio_file_path: str):
 
     print("Converting from JSON")
     formats = convert_from_json(json_file_path)
-    print(formats)
     for format, content in formats.items():
         if format == "json":
             continue
         output_path = wav_audio_file_path.with_suffix(f".{format}")
-        print(f"Writing to {json_file_path}")
+        print(f"Writing to {output_path}")
         output_path.write_text(content)
 
     eaf_file_path = wav_audio_file_path.with_suffix(".eaf")
