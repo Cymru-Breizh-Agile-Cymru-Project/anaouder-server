@@ -66,20 +66,15 @@ async def get_status(stt_id):
         return {
             "version": 2,
             "status": task_result.status,
-            "done": task_result.date_done 
+            "done": task_result.date_done,
         }
-    
+
     potential_path = Path(UPLOAD_DIR) / f"{stt_id}.eaf"
     if potential_path.exists():
         time = datetime.fromtimestamp(potential_path.stat().st_ctime, tz=timezone.utc)
-        return {
-            "version": 2,
-            "status": "Success",
-            "done": time.isoformat()
-        }
+        return {"version": 2, "status": "Success", "done": time.isoformat()}
 
     return {"version": 2, "status": "UNKNOWN"}
-
 
 
 @app.post("/keyboard/", response_class=FileResponse)
@@ -243,7 +238,12 @@ async def get_elan(stt_id):
 @app.get("/get_srt/", response_class=FileResponse)
 async def get_srt(stt_id):
     srt_file_path = Path(os.path.join(UPLOAD_DIR, stt_id + ".srt"))
-    return srt_file_path
+    return FileResponse(path=srt_file_path, filename=Path(srt_file_path).name)
+
+@app.get("/get_text/")
+def get_text(stt_id):
+    text_file_path = os.path.join(UPLOAD_DIR, stt_id + ".txt")
+    return FileResponse(path=text_file_path, filename=Path(text_file_path).name)
 
 
 @app.get("/get_vtt/")
