@@ -6,6 +6,7 @@ from xml.dom import minidom
 from anaouder.asr.models import get_latest_model
 from audio_utils import prepare_audio
 from celery import Celery
+from json_conversion import convert_from_json
 from speech_to_text_tasks import SpeechToTextTask
 
 # was 'redis://redis:6379/0'
@@ -38,15 +39,17 @@ def speech_to_text(self, audio_file_path: str):
 
     audio_id = Path(audio_file_path).stem
     wav_audio_file_path = prepare_audio(audio_file_path)
-    eaf_file_path = wav_audio_file_path.with_suffix(".eaf")
+    json_file_path = wav_audio_file_path.with_suffix(".json")
     print("Running adskrivan")
+    print(f"Writing to {json_file_path}")
+    model_path = Path("/models") / get_latest_model()
     process = subprocess.Popen(
         [
             "adskrivan",
-            *("-m", str(Path("/models") / get_latest_model())),
-            *("-t", "eaf"),
-            *("-o", str(eaf_file_path)),
-            "--autosplit",
+            *("-m", str(model_path)),
+            *("--set-ffmpeg-path", "/usr/bin/ffmpeg"),
+            *("-t", "json"),
+            *("-o", str(json_file_path)),
             str(wav_audio_file_path),
         ],
         stdout=subprocess.PIPE,
@@ -60,6 +63,17 @@ def speech_to_text(self, audio_file_path: str):
             f"sub-process call to adskrivan returned a non-zero return code ({process.returncode})"
         )
 
+    print("Converting from JSON")
+    formats = convert_from_json(json_file_path)
+    print(formats)
+    for format, content in formats.items():
+        if format == "json":
+            continue
+        output_path = wav_audio_file_path.with_suffix(f".{format}")
+        print(f"Writing to {json_file_path}")
+        output_path.write_text(content)
+
+    eaf_file_path = wav_audio_file_path.with_suffix(".eaf")
     print("Patching the ELAN file")
     doc = minidom.parseString(eaf_file_path.read_text())
     media_descriptor = doc.getElementsByTagName("MEDIA_DESCRIPTOR")[0]
