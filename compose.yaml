@@ -11,7 +11,7 @@ services:
        context: ${PWD}/api
        dockerfile: Dockerfile
      ports:
-       - "5011:8000"
+       - "5511:8000"
      volumes: 
        - ${PWD}/models:/models
        - ${PWD}/recordings:/recordings
